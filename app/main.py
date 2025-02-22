@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from .db import ShortenedUrl, get_db_session
 from .service import create_short_link
+import subprocess
 
 app = FastAPI()
 
@@ -38,3 +39,12 @@ def redirect(short_link: str, db: Session = Depends(get_db_session)):
             status_code=404, detail="The link does not exist, could not redirect."
         )
     return RedirectResponse(url=obj.original_url)
+    
+def run_migrations():
+    try:
+        subprocess.run(["alembic", "upgrade", "head"], check=True)
+        print("✅ Database migrations applied successfully.")
+    except subprocess.CalledProcessError as e:
+        print("❌ Error applying migrations:", e)
+
+run_migrations()
